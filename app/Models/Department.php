@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Department extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_departemen'];
+    protected $fillable = ['department_name'];
 
-    public function pegawais()
+  
+    public function employees(): HasMany
     {
-        return $this->hasMany(Pegawai::class, 'departemen_id');
+        return $this->hasMany(Employee::class);
     }
 }
