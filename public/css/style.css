@@ -1,0 +1,13 @@
+body {
+    background-color: #f8f9fa;
+    padding-top: 56px;
+}
+
+.custom-table {
+    border: 2px solid #007bff;
+}
+
+.btn-custom {
+    background-color: #ffc107;
+    color: #343a40;
+}
