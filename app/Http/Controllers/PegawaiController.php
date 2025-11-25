@@ -2,74 +2,95 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
+use App\Models\Department; 
+use App\Models\Position;  
 use Illuminate\Http\Request;
-use App\Models\Pegawai;
-use App\Models\Department;
-use App\Models\Position;
 
 class PegawaiController extends Controller
 {
+
     public function index()
     {
-        $pegawais = Pegawai::with(['departemen', 'jabatan'])->get();
-        return view('pegawai.index', compact('pegawais'));
+  
+        $employees = Employee::with(['department', 'position'])->get();
+        return view('employees.index', compact('employees'));
     }
+
 
     public function create()
     {
-        $departemen = Department::all();
-        $jabatan = Position::all();
-        return view('pegawai.create', compact('departemen', 'jabatan'));
+  
+        $departments = Department::all();
+        $positions = Position::all();
+        
+        return view('employees.create', compact('departments', 'positions'));
     }
 
+ 
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required',
-            'nip' => 'required',
-            'departemen_id' => 'required',
-            'jabatan_id' => 'required',
-            'tanggal_masuk' => 'required|date',
-            'gaji' => 'required|numeric',
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email',
+            'phone_number' => 'nullable|string|max:15',
+            'birth_date' => 'required|date',
+            'address' => 'nullable|string',
+            'entry_date' => 'required|date',
+            'status' => 'required|string|max:50',
+            'department_id' => 'required|exists:departments,id', 
+            'position_id' => 'required|exists:positions,id',  
         ]);
 
-        Pegawai::create([
-            'nama' => $request->nama,
-            'nip' => $request->nip,
-            'departemen_id' => $request->departemen_id,
-            'jabatan_id' => $request->jabatan_id,
-            'tanggal_masuk' => $request->tanggal_masuk,
-            'gaji' => $request->gaji,
-        ]);
+        Employee::create($request->all());
 
-        return redirect()->route('pegawai.index')->with('success', 'Data pegawai berhasil ditambahkan!');
+        return redirect()->route('employees.index')
+                         ->with('success', 'Pegawai berhasil ditambahkan.');
     }
 
-   public function edit($id)
-{
-    $pegawai = Pegawai::findOrFail($id);
-    $departemen = Department::all();
-    $jabatan = Position::all();
 
-    return view('pegawai.edit', compact('pegawai', 'departemen', 'jabatan'));
-}
-
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'nama' => 'required',
-        'nip' => 'required',
-        'departemen_id' => 'required',
-        'jabatan_id' => 'required',
-        'tanggal_masuk' => 'required|date',
-        'gaji' => 'required|numeric',
-    ]);
-
-    $pegawai = Pegawai::findOrFail($id);
-    $pegawai->update($request->all());
-
-    return redirect()->route('pegawai.index')->with('success', 'Data pegawai berhasil diperbarui!');
-}
+    public function show(Employee $employee)
+    {
+        return view('employees.show', compact('employee'));
+    }
 
 
+    public function edit(Employee $employee)
+    {
+       
+        $departments = Department::all();
+        $positions = Position::all();
+
+        return view('employees.edit', compact('employee', 'departments', 'positions'));
+    }
+
+
+    public function update(Request $request, Employee $employee)
+    {
+        $request->validate([
+            'full_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'phone_number' => 'nullable|string|max:15',
+            'birth_date' => 'required|date',
+            'address' => 'nullable|string',
+            'entry_date' => 'required|date',
+            'status' => 'required|string|max:50',
+            'department_id' => 'required|exists:departments,id',
+            'position_id' => 'required|exists:positions,id',
+        ]);
+
+        $employee->update($request->all());
+
+        return redirect()->route('employees.index')
+                         ->with('success', 'Pegawai berhasil diperbarui.');
+    }
+
+
+    public function destroy(Employee $employee)
+    {
+        $employee->delete();
+
+        return redirect()->route('employees.index')
+                         ->with('success', 'Pegawai berhasil dihapus.');
+    }
 }
